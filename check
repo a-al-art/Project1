@@ -1,0 +1,5 @@
+# создаем окно с размером size
+screen = pygame.display.set_mode(size)
+# даём название окну
+pygame.display.set_caption('Snake game')
+# игровой цикл while
