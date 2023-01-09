@@ -30,7 +30,7 @@ class Snake:
         self.y = y
 
 
-# функция бля рисования квадратиков (как для поля, так и для змейки)
+# функция для рисования квадратиков (как для поля, так и для змейки)
 def add_new_block(color, row, col):
     pygame.draw.rect(screen, color, [LEN_SQ + col * LEN_SQ + INDENT * (col + 1),
                                      TITLE_INDENT + LEN_SQ + row * LEN_SQ + INDENT * (row + 1),
