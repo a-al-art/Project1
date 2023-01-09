@@ -1,0 +1,149 @@
+import pygame
+import random
+
+pygame.init()
+pygame.font.init()
+
+# цвета
+DARK_GREEN = (84, 140, 11)
+GREEN = (217, 245, 181)
+
+# задаем раземры экрана
+WIDTH = 800
+HEIGHT = 480
+
+FPS = 60
+# шрифты
+ARIAl_FONT = pygame.font.match_font('arial')
+ARIAl_FONT_42 = pygame.font.Font(ARIAl_FONT, 42)
+ARIAl_FONT_32 = pygame.font.Font(ARIAl_FONT, 32)
+
+# название окна
+TITLE = 'Single ping pong'
+
+# парамерты платформы
+PLATFORM_WIDTH = 150
+PLATFORM_HEIGHT = 15
+PLATFORM_SPEED = 12
+
+# параметры шаркика
+CIRCLE_RADIUS = 15
+CIRCLE_SPEED = 8
+
+# было ли перове столкновение
+circle_first_collide = False
+circle_x_speed = 0
+circle_y_speed = CIRCLE_SPEED
+
+# для операций с прямоугольными областями
+platform_rect = pygame.rect.Rect(WIDTH // 2 - PLATFORM_WIDTH // 2,
+                                 HEIGHT - PLATFORM_HEIGHT * 2,
+                                 PLATFORM_WIDTH,
+                                 PLATFORM_HEIGHT)
+
+circle_rect = pygame.rect.Rect(WIDTH // 2 - CIRCLE_RADIUS,
+                               HEIGHT // 2 - CIRCLE_RADIUS,
+                               CIRCLE_RADIUS * 2,
+                               CIRCLE_RADIUS * 2)
+
+# очки
+score = 0
+
+# создание экрана и его названия
+screen = pygame.display.set_mode([WIDTH, HEIGHT])
+pygame.display.set_caption(TITLE)
+
+clock = pygame.time.Clock()
+
+# игровой цикл
+game_over = False
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            continue
+
+        # выход на ESCAPE
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
+                continue
+
+            # перезапуск игры
+            elif event.key == pygame.K_r:
+                game_over = False
+
+                # возвращение на начальные позиции
+                platform_rect.centerx = WIDTH // 2
+                platform_rect.bottom = HEIGHT - PLATFORM_HEIGHT
+
+                circle_rect.center = [WIDTH // 2, HEIGHT // 2]
+                circle_x_speed = 0
+                circle_y_speed = CIRCLE_SPEED
+                circle_first_collide = False
+
+                score = 0
+
+    screen.fill(GREEN)
+
+    if not game_over:
+        # получаем список нажатых клавишей
+        keys = pygame.key.get_pressed()
+
+        # проверка клавиш клавиатуры
+        if keys[pygame.K_a]:
+            platform_rect.x -= PLATFORM_SPEED
+        elif keys[pygame.K_d]:
+            platform_rect.x += PLATFORM_SPEED
+
+        # если столкнулись платфонма и шарик
+        if platform_rect.colliderect(circle_rect):
+            if not circle_first_collide:
+                if random.randint(0, 1) == 0:
+                    circle_x_speed = CIRCLE_SPEED
+                else:
+                    circle_x_speed = -CIRCLE_SPEED
+                circle_first_collide = True
+
+            circle_y_speed = -CIRCLE_SPEED
+            score += 1
+
+        # рисуем платформу
+        pygame.draw.rect(screen, DARK_GREEN, platform_rect)
+
+    # скорости в зависимости от отражения
+    circle_rect.x += circle_x_speed
+    circle_rect.y += circle_y_speed
+
+    # отражение шарика от полей и придание скорости
+    if circle_rect.bottom >= HEIGHT:
+        game_over = True
+        circle_y_speed = -CIRCLE_SPEED
+
+    elif circle_rect.top <= 0:
+        circle_y_speed = CIRCLE_SPEED
+
+    elif circle_rect.left <= 0:
+        circle_x_speed = CIRCLE_SPEED
+
+    elif circle_rect.right >= WIDTH:
+        circle_x_speed = -CIRCLE_SPEED
+
+    # рисуем шарик
+    pygame.draw.circle(screen, DARK_GREEN, circle_rect.center, CIRCLE_RADIUS)
+
+    # печатаем текст на экране
+    score_surface = ARIAl_FONT_42.render(str(score), True, DARK_GREEN)
+    if not game_over:
+        screen.blit(score_surface, [WIDTH // 2 - score_surface.get_width() // 2, 15])
+    else:
+        retry_surface = ARIAl_FONT_32.render('нажми R чтобы перезапустить игру', True, DARK_GREEN)
+        screen.blit(score_surface, [WIDTH // 2 - score_surface.get_width() // 2, HEIGHT // 3])
+        screen.blit(retry_surface, [WIDTH // 2 - retry_surface.get_width() // 2,
+                                    HEIGHT // 3 + score_surface.get_height()])
+
+    clock.tick(FPS)
+    pygame.display.flip()
+
+pygame.quit()
