@@ -49,7 +49,7 @@ class Snake:
         return isinstance(other, Snake) and self.x == other.x and self.y == other.y
 
 
-# функция бля рисования квадратиков (как для поля, так и для змейки)
+# функция для рисования квадратиков (как для поля, так и для змейки)
 
 def add_new_block(color, row, col):
     pygame.draw.rect(screen, color, [LEN_SQ + col * LEN_SQ + INDENT * (col + 1),
